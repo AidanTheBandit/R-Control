@@ -2,6 +2,8 @@
   "name": "r-control-monorepo",
   "private": true,
   "scripts": {
+    "dev": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:control\" \"pnpm run dev:r1\"",
+    "build:all": "pnpm run build:backend && pnpm run build:control && pnpm run build:r1",
     "dev:r1": "pnpm --filter r1-plugin dev",
     "dev:control": "pnpm --filter control-panel dev",
     "dev:backend": "pnpm --filter backend dev",
@@ -10,6 +12,7 @@
     "build:backend": "pnpm --filter backend build"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "typescript": "^5.0.0"
   },
   "packageManager": "pnpm@8.15.0"
