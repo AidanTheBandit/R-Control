@@ -2,24 +2,47 @@ import { useState, useEffect, useCallback } from "react"
 import { cn } from "../lib/utils"
 
 const SongCarousel = ({
-  songs = [
-    { title: "Imperial Circus Dead Decadence", artist: "deetz", difficulty: "extra", stars: 6 },
-    { title: "Minorsonek's Easy", artist: "ChuuritsuTv", difficulty: "normal", stars: 2 },
-    { title: "Imperial Circus Dead Decadence (Intro ver.)", artist: "ChuuritsuTv", difficulty: "normal", stars: 2 },
-    { title: "ウタカタストロフィ", artist: "HelloSCV", difficulty: "insane", stars: 5 },
-    { title: "Uta ni Katachi wa nai keredo", artist: "Nymph_", difficulty: "expert", stars: 6 },
-    { title: "Uta ni Katachi wa nai Keredo", artist: "JoJo", difficulty: "expert", stars: 5 },
-    { title: "歌に形はないけれど", artist: "Natsu", difficulty: "hard", stars: 4 },
-    { title: "Blue Zenith", artist: "xi", difficulty: "extra", stars: 7 },
-    { title: "FREEDOM DiVE", artist: "xi", difficulty: "extra", stars: 8 },
-    { title: "Galaxy Collapse", artist: "Kurokotei", difficulty: "insane", stars: 6 },
-  ],
-  onSongSelect,
-  className
+  items = [],
+  onItemSelect,
+  onAction,
+  className,
+  renderItem,
+  renderActions,
+  itemHeight = 80,
+  maxVisibleItems = 5,
 }) => {
-  const [selectedIndex, setSelectedIndex] = useState(2)
+  const [selectedIndex, setSelectedIndex] = useState(Math.min(2, items.length - 1))
   const [isAnimating, setIsAnimating] = useState(false)
   const [lastScrollTime, setLastScrollTime] = useState(0)
+
+  // Default renderers
+  const defaultRenderItem = (item, index) => ({
+    title: item.title || item.name || `Item ${index + 1}`,
+    subtitle: item.subtitle || item.artist || item.description || '',
+    difficulty: item.difficulty || 'normal',
+  })
+
+  const defaultRenderActions = (item, index) => [
+    {
+      label: 'Select',
+      action: 'select',
+      variant: 'primary'
+    }
+  ]
+
+  const getItemData = (item, index) => {
+    if (renderItem) {
+      return renderItem(item, index)
+    }
+    return defaultRenderItem(item, index)
+  }
+
+  const getItemActions = (item, index) => {
+    if (renderActions) {
+      return renderActions(item, index)
+    }
+    return defaultRenderActions(item, index)
+  }
 
   const albumArts = [
     "linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)",
@@ -80,16 +103,41 @@ const SongCarousel = ({
     )
   }
 
-  const SongCard = ({
-    song,
+  const ActionButton = ({ action, onClick, variant = 'secondary', size = 'sm' }) => {
+    const baseClasses = "px-3 py-1 rounded text-xs font-medium transition-colors"
+    const variants = {
+      primary: "bg-blue-500 text-white hover:bg-blue-600",
+      secondary: "bg-gray-500 text-white hover:bg-gray-600",
+      success: "bg-green-500 text-white hover:bg-green-600",
+      danger: "bg-red-500 text-white hover:bg-red-600",
+    }
+
+    return (
+      <button
+        className={cn(baseClasses, variants[variant])}
+        onClick={(e) => {
+          e.stopPropagation()
+          onClick(action)
+        }}
+      >
+        {action.label}
+      </button>
+    )
+  }
+
+  const ItemCard = ({
+    item,
     index,
     position,
     onClick,
     isAnimating,
   }) => {
+    const itemData = getItemData(item, index)
+    const actions = getItemActions(item, index)
+
     const getCardStyles = () => {
       const baseClasses =
-        "absolute right-0 h-20 rounded-l-lg flex items-center cursor-pointer overflow-hidden transition-all duration-500 ease-out transform-gpu"
+        "absolute right-0 rounded-l-lg flex items-center cursor-pointer overflow-hidden transition-all duration-500 ease-out transform-gpu"
 
       switch (position) {
         case 0: // Center card - fully expanded
@@ -142,27 +190,46 @@ const SongCarousel = ({
       }
     }
 
+    const handleAction = (action) => {
+      if (onAction) {
+        onAction(action.action, item, index)
+      }
+    }
+
     return (
       <div
         className={cn(
           getCardStyles(),
-          `bg-gradient-to-r ${difficultyColors[song.difficulty]}`,
+          `bg-gradient-to-r ${difficultyColors[itemData.difficulty] || 'from-gray-400 to-gray-600'}`,
           "hover:translate-x-[-20px] hover:scale-105 hover:shadow-3xl hover:z-[100]",
         )}
         onClick={onClick}
         style={{
-          top: `${position * 82 + 250}px`,
+          top: `${position * (itemHeight + 2) + 250}px`,
+          height: `${itemHeight}px`,
           transformOrigin: "right center",
         }}
       >
         <div
-          className="w-20 h-20 flex-shrink-0 bg-cover bg-center"
-          style={{ background: albumArts[index % albumArts.length] }}
+          className="w-20 h-full flex-shrink-0 bg-cover bg-center"
+          style={{ background: itemData.image || albumArts[index % albumArts.length] }}
         />
         <div className="flex-1 px-5 py-3 min-w-0">
-          <div className="text-white font-bold text-base mb-1 truncate">{song.title}</div>
-          <div className="text-white/90 text-sm mb-1.5 truncate">{song.artist}</div>
-          <StarRating stars={song.stars} />
+          <div className="text-white font-bold text-base mb-1 truncate">{itemData.title}</div>
+          <div className="text-white/90 text-sm mb-1.5 truncate">{itemData.subtitle}</div>
+          <div className="flex items-center justify-between">
+            {itemData.stars > 0 && <StarRating stars={itemData.stars} />}
+            <div className="flex gap-2 ml-auto">
+              {actions.map((action, actionIndex) => (
+                <ActionButton
+                  key={actionIndex}
+                  action={action}
+                  onClick={handleAction}
+                  variant={action.variant}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -171,18 +238,18 @@ const SongCarousel = ({
   const moveSelection = useCallback(
     (direction) => {
       const newIndex = selectedIndex + direction
-      if (newIndex >= 0 && newIndex < songs.length) {
+      if (newIndex >= 0 && newIndex < items.length) {
         setIsAnimating(true)
         setSelectedIndex(newIndex)
 
         setTimeout(() => setIsAnimating(false), 500)
 
-        if (onSongSelect) {
-          onSongSelect(songs[newIndex], newIndex)
+        if (onItemSelect) {
+          onItemSelect(items[newIndex], newIndex)
         }
       }
     },
-    [selectedIndex, songs, onSongSelect],
+    [selectedIndex, items, onItemSelect],
   )
 
   const handleCardClick = useCallback(
@@ -193,12 +260,12 @@ const SongCarousel = ({
 
         setTimeout(() => setIsAnimating(false), 500)
 
-        if (onSongSelect) {
-          onSongSelect(songs[index], index)
+        if (onItemSelect) {
+          onItemSelect(items[index], index)
         }
       }
     },
-    [selectedIndex, songs, onSongSelect],
+    [selectedIndex, items, onItemSelect],
   )
 
   useEffect(() => {
@@ -235,19 +302,27 @@ const SongCarousel = ({
     }
   }, [moveSelection, lastScrollTime])
 
+  if (items.length === 0) {
+    return (
+      <div className={cn("flex items-center justify-center h-full text-white", className)}>
+        No items to display
+      </div>
+    )
+  }
+
   return (
     <div className={cn("relative w-full h-full", className)}>
       <div className="absolute right-0 top-1/2 -translate-y-1/2 h-full flex flex-col justify-center items-end perspective-1000">
         <div className="relative h-[500px] w-[650px]">
-          {songs.map((song, index) => {
+          {items.map((item, index) => {
             const relativePosition = index - selectedIndex
 
-            if (Math.abs(relativePosition) > 5) return null
+            if (Math.abs(relativePosition) > Math.floor(maxVisibleItems / 2)) return null
 
             return (
-              <SongCard
+              <ItemCard
                 key={index}
-                song={song}
+                item={item}
                 index={index}
                 position={relativePosition}
                 onClick={() => handleCardClick(index)}

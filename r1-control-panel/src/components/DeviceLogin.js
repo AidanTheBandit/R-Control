@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
 import QRCode from 'qrcode.react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 const DeviceLogin = ({
     deviceId,
@@ -19,108 +23,106 @@ const DeviceLogin = ({
     };
 
     return (
-        <div className="login-container">
-            <div className="login-card">
-                <div className="login-header">
-                    <h1>R1 Control Panel</h1>
-                    <p>Connect to your R1 device</p>
-                </div>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
+            <div className="w-full max-w-md space-y-6">
+                <Card>
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-2xl">R-Control One</CardTitle>
+                        <CardDescription>Connect to your R1 device</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="deviceId">Device ID *</Label>
+                                <Input
+                                    id="deviceId"
+                                    type="text"
+                                    value={deviceId}
+                                    onChange={(e) => onDeviceIdChange(e.target.value)}
+                                    placeholder="e.g., green-wolf-23"
+                                    required
+                                    disabled={isLoading}
+                                />
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                    Your unique R1 device identifier
+                                </p>
+                            </div>
 
-                <form onSubmit={handleSubmit} className="login-form">
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="deviceId">
-                            Device ID *
-                        </label>
-                        <input
-                            id="deviceId"
-                            type="text"
-                            className="form-input"
-                            value={deviceId}
-                            onChange={(e) => onDeviceIdChange(e.target.value)}
-                            placeholder="e.g., green-wolf-23"
-                            required
-                            disabled={isLoading}
+                            <div className="space-y-2">
+                                <Label htmlFor="pinCode">PIN Code (optional)</Label>
+                                <Input
+                                    id="pinCode"
+                                    type="password"
+                                    value={pinCode}
+                                    onChange={(e) => onPinCodeChange(e.target.value)}
+                                    placeholder="6-digit PIN (if enabled)"
+                                    disabled={isLoading}
+                                />
+                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                    Leave empty if PIN authentication is disabled
+                                </p>
+                            </div>
+
+                            {error && (
+                                <div className="p-3 text-sm text-red-600 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+                                    {error}
+                                </div>
+                            )}
+
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={isLoading || !deviceId.trim()}
+                            >
+                                {isLoading ? 'Connecting...' : 'Connect to Device'}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Install R1 Creation</CardTitle>
+                        <CardDescription>Scan this QR code on your R1 device</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex justify-center">
+                        <QRCode
+                            value={JSON.stringify({
+                                title: "R1 Creation",
+                                url: "https://r1a.boondit.site/creation",
+                                description: "R-Control One UI for R1",
+                                iconUrl: "https://boondit.site/icons/r1a.png",
+                                themeColor: "#ff61f2"
+                            })}
+                            size={200}
+                            fgColor="#1e293b"
+                            bgColor="#ffffff"
+                            level="M"
                         />
-                        <div className="form-help">
-                            Your unique R1 device identifier
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Security & Privacy</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        <div>
+                            <h4 className="font-medium mb-1">🔒 Your Data Stays Private</h4>
+                            <ul className="space-y-1 text-slate-600 dark:text-slate-400">
+                                <li>• Device credentials stored locally in your browser</li>
+                                <li>• Only you can access your R1 device</li>
+                                <li>• No data shared with other users</li>
+                            </ul>
                         </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="form-label" htmlFor="pinCode">
-                            PIN Code (optional)
-                        </label>
-                        <input
-                            id="pinCode"
-                            type="password"
-                            className="form-input"
-                            value={pinCode}
-                            onChange={(e) => onPinCodeChange(e.target.value)}
-                            placeholder="6-digit PIN (if enabled)"
-                            disabled={isLoading}
-                        />
-                        <div className="form-help">
-                            Leave empty if PIN authentication is disabled
+                        <div>
+                            <h4 className="font-medium mb-1">Need Help?</h4>
+                            <p className="text-slate-600 dark:text-slate-400">
+                                Find your device ID in the R1 Creation app. The PIN is shown when your R1 first connects.
+                            </p>
                         </div>
-                    </div>
-
-                    {error && (
-                        <div className="error-message">
-                            {error}
-                        </div>
-                    )}
-
-                    <button
-                        type="submit"
-                        className="btn login-btn"
-                        disabled={isLoading || !deviceId.trim()}
-                    >
-                        {isLoading ? (
-                            <>
-                                <span className="loading"></span>
-                                Connecting...
-                            </>
-                        ) : (
-                            'Connect to Device'
-                        )}
-                    </button>
-                </form>
-
-                <div className="qr-section">
-                    <h4>Add R1 Creation to R1</h4>
-                    <QRCode 
-                        value={JSON.stringify({
-                            title: "R1 Anywhere",
-                            url: "https://r1a.boondit.site/creation",
-                            description: "Use R1 anywhere",
-                            iconUrl: "https://boondit.site/icons/r1a.png",
-                            themeColor: "#ff61f2"
-                        })}
-                        size={400}
-                        fgColor="#ebdbb2"
-                        bgColor="#282828"
-                        level="M"
-                    />
-                </div>
-
-                <div className="login-footer">
-                    <div className="security-note">
-                        <h4>🔒 Privacy & Security</h4>
-                        <ul>
-                            <li>Your device ID and PIN are stored locally in your browser</li>
-                            <li>Only you can access your R1 device with these credentials</li>
-                            <li>No device information is shared with other users</li>
-                        </ul>
-                    </div>
-
-                    <div className="help-section">
-                        <h4>Need Help?</h4>
-                        <p>
-                            Find your device ID in the R1 Anywhere app on your device.
-                            The PIN is displayed when your R1 first connects to the server.
-                        </p>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

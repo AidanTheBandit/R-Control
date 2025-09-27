@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import StatusBar from './components/StatusBar'
 import ConsolePanel from './components/ConsolePanel'
+import MainNavigation from './components/MainNavigation'
 import { useConsole } from './hooks/useConsole'
 import { useSocket } from './hooks/useSocket'
 import { useR1SDK } from './hooks/useR1SDK'
 import { useDeviceManagement } from './hooks/useDeviceManagement'
 
 function App() {
+  const [currentView, setCurrentView] = useState('navigation') // 'navigation', 'console', 'media', etc.
+
   // Console logging hook
   const { consoleLogs, consoleRef, addConsoleLog, sendErrorToServer } = useConsole()
 
@@ -77,6 +80,117 @@ function App() {
     }
   }, [addConsoleLog, sendErrorToServer, connectSocket, socketRef])
 
+  const handleNavigate = (viewId, item, action) => {
+    console.log('Navigating to:', viewId, 'with action:', action)
+    setCurrentView(viewId)
+
+    // Handle specific actions
+    switch (viewId) {
+      case 'console':
+        if (action === 'info') {
+          addConsoleLog(`Opening console info for ${item.title}`)
+        }
+        break
+      case 'media':
+        addConsoleLog(`Opening media controls: ${item.title}`)
+        break
+      case 'device':
+        addConsoleLog(`Opening device management: ${item.title}`)
+        break
+      case 'sharing':
+        addConsoleLog(`Opening file sharing: ${item.title}`)
+        break
+      case 'apps':
+        addConsoleLog(`Opening apps & plugins: ${item.title}`)
+        break
+      default:
+        addConsoleLog(`Unknown navigation: ${viewId}`)
+    }
+  }
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'console':
+        return (
+          <div className="main-content">
+            <div className="p-4">
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+            <ConsolePanel consoleLogs={consoleLogs} ref={consoleRef} />
+          </div>
+        )
+      case 'media':
+        return (
+          <div className="main-content flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">Media Controls</h2>
+              <p className="text-slate-400 mb-6">Coming soon...</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
+      case 'device':
+        return (
+          <div className="main-content flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">Device Management</h2>
+              <p className="text-slate-400 mb-6">Coming soon...</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
+      case 'sharing':
+        return (
+          <div className="main-content flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">File Sharing</h2>
+              <p className="text-slate-400 mb-6">Coming soon...</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
+      case 'apps':
+        return (
+          <div className="main-content flex items-center justify-center">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">Apps & Plugins</h2>
+              <p className="text-slate-400 mb-6">Coming soon...</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
+      default:
+        return (
+          <MainNavigation onNavigate={handleNavigate} />
+        )
+    }
+  }
+
   return (
     <div className="app">
       <StatusBar
@@ -90,10 +204,8 @@ function App() {
         onEnablePin={handleEnablePin}
       />
 
-      {/* Main Content - Activity Log */}
-      <div className="main-content">
-        <ConsolePanel consoleLogs={consoleLogs} ref={consoleRef} />
-      </div>
+      {/* Main Content */}
+      {renderCurrentView()}
     </div>
   )
 }
