@@ -4,10 +4,8 @@ import { cn } from "../lib/utils"
 const SongCarousel = ({
   items = [],
   onItemSelect,
-  onAction,
   className,
   renderItem,
-  renderActions,
   itemHeight = 80,
   maxVisibleItems = 5,
 }) => {
@@ -15,33 +13,19 @@ const SongCarousel = ({
   const [isAnimating, setIsAnimating] = useState(false)
   const [lastScrollTime, setLastScrollTime] = useState(0)
 
-  // Default renderers
+  // Default renderer
   const defaultRenderItem = (item, index) => ({
     title: item.title || item.name || `Item ${index + 1}`,
     subtitle: item.subtitle || item.artist || item.description || '',
     difficulty: item.difficulty || 'normal',
+    image: item.image || item.albumArt,
   })
-
-  const defaultRenderActions = (item, index) => [
-    {
-      label: 'Select',
-      action: 'select',
-      variant: 'primary'
-    }
-  ]
 
   const getItemData = (item, index) => {
     if (renderItem) {
       return renderItem(item, index)
     }
     return defaultRenderItem(item, index)
-  }
-
-  const getItemActions = (item, index) => {
-    if (renderActions) {
-      return renderActions(item, index)
-    }
-    return defaultRenderActions(item, index)
   }
 
   const albumArts = [
@@ -65,28 +49,6 @@ const SongCarousel = ({
     extra: "from-pink-500 to-pink-700",
   }
 
-  const ActionButton = ({ action, onClick, variant = 'secondary', size = 'sm' }) => {
-    const baseClasses = "px-3 py-1 rounded text-xs font-medium transition-colors"
-    const variants = {
-      primary: "bg-blue-500 text-white hover:bg-blue-600",
-      secondary: "bg-gray-500 text-white hover:bg-gray-600",
-      success: "bg-green-500 text-white hover:bg-green-600",
-      danger: "bg-red-500 text-white hover:bg-red-600",
-    }
-
-    return (
-      <button
-        className={cn(baseClasses, variants[variant])}
-        onClick={(e) => {
-          e.stopPropagation()
-          onClick(action)
-        }}
-      >
-        {action.label}
-      </button>
-    )
-  }
-
   const ItemCard = ({
     item,
     index,
@@ -95,7 +57,6 @@ const SongCarousel = ({
     isAnimating,
   }) => {
     const itemData = getItemData(item, index)
-    const actions = getItemActions(item, index)
 
     const getCardStyles = () => {
       const baseClasses =
@@ -152,12 +113,6 @@ const SongCarousel = ({
       }
     }
 
-    const handleAction = (action) => {
-      if (onAction) {
-        onAction(action.action, item, index)
-      }
-    }
-
     return (
       <div
         className={cn(
@@ -178,19 +133,7 @@ const SongCarousel = ({
         />
         <div className="flex-1 px-5 py-3 min-w-0">
           <div className="text-white font-bold text-base mb-1 truncate">{itemData.title}</div>
-          <div className="text-white/90 text-sm mb-1.5 truncate">{itemData.subtitle}</div>
-          <div className="flex items-center justify-between">
-            <div className="flex gap-2 ml-auto">
-              {actions.map((action, actionIndex) => (
-                <ActionButton
-                  key={actionIndex}
-                  action={action}
-                  onClick={handleAction}
-                  variant={action.variant}
-                />
-              ))}
-            </div>
-          </div>
+          <div className="text-white/90 text-sm truncate">{itemData.subtitle}</div>
         </div>
       </div>
     )

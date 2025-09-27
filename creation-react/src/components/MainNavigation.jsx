@@ -2,50 +2,31 @@ import { useState } from 'react'
 import SongCarousel from './song-carousel'
 
 const MainNavigation = ({ onNavigate }) => {
+  const [backgroundGradient, setBackgroundGradient] = useState('linear-gradient(135deg, #667eea 0%, #764ba2 100%)')
+
   const navigationItems = [
     {
-      id: 'media',
-      title: 'Media Controls',
-      subtitle: 'Spotify, YouTube Music, Apple Music',
+      id: 'music',
+      title: 'Music',
+      subtitle: 'Play from Spotify, YouTube Music, Apple Music & Copyparty',
       difficulty: 'normal',
       image: 'linear-gradient(135deg, #1db954 0%, #1ed760 100%)', // Spotify green
     },
     {
-      id: 'device',
-      title: 'Device Management',
-      subtitle: 'Storage, PIN, Settings',
+      id: 'media',
+      title: 'Media Controls',
+      subtitle: 'Control media playback on other devices',
       difficulty: 'hard',
       image: 'linear-gradient(135deg, #007acc 0%, #005999 100%)', // Blue
     },
     {
-      id: 'sharing',
-      title: 'File Sharing',
-      subtitle: 'CopyParty & Boop Share',
+      id: 'options',
+      title: 'Options',
+      subtitle: 'Settings, device management, and configuration',
       difficulty: 'expert',
-      image: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', // Orange
-    },
-    {
-      id: 'apps',
-      title: 'Apps & Plugins',
-      subtitle: 'MCP Servers, Extensions',
-      difficulty: 'insane',
-      image: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)', // Purple
-    },
-    {
-      id: 'console',
-      title: 'Console & Logs',
-      subtitle: 'System monitoring',
-      difficulty: 'normal',
       image: 'linear-gradient(135deg, #424242 0%, #212121 100%)', // Gray
     },
   ]
-
-  const handleItemSelect = (item, index) => {
-    console.log('Selected navigation item:', item)
-    if (onNavigate) {
-      onNavigate(item.id, item)
-    }
-  }
 
   const handleAction = (action, item, index) => {
     console.log('Action triggered:', action, 'for item:', item)
@@ -54,30 +35,34 @@ const MainNavigation = ({ onNavigate }) => {
     }
   }
 
-  const renderActions = (item, index) => [
-    {
-      label: 'Open',
-      action: 'open',
-      variant: 'primary'
-    },
-    {
-      label: 'Info',
-      action: 'info',
-      variant: 'secondary'
+  const handleItemChange = (item, index) => {
+    // Update background based on selected item
+    const gradients = {
+      music: 'linear-gradient(135deg, #1db954 0%, #1ed760 100%)',
+      media: 'linear-gradient(135deg, #007acc 0%, #005999 100%)',
+      options: 'linear-gradient(135deg, #424242 0%, #212121 100%)',
     }
-  ]
+    setBackgroundGradient(gradients[item.id] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)')
+  }
 
   return (
-    <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <SongCarousel
-        items={navigationItems}
-        onItemSelect={handleItemSelect}
-        onAction={handleAction}
-        renderActions={renderActions}
-        itemHeight={100}
-        maxVisibleItems={5}
-        className="h-full"
-      />
+    <div
+      className="w-full h-full transition-all duration-1000 ease-in-out"
+      style={{ background: backgroundGradient }}
+    >
+      <div className="p-6">
+        <SongCarousel
+          items={navigationItems}
+          onItemSelect={(item, index) => {
+            handleItemSelect(item, index)
+            handleItemChange(item, index)
+          }}
+          onAction={handleAction}
+          itemHeight={100}
+          maxVisibleItems={5}
+          className="h-[600px]"
+        />
+      </div>
     </div>
   )
 }

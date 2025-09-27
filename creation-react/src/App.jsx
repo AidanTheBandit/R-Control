@@ -90,22 +90,14 @@ function App() {
 
     // Handle specific actions
     switch (viewId) {
-      case 'console':
-        if (action === 'info') {
-          addConsoleLog(`Opening console info for ${item.title}`)
-        }
+      case 'music':
+        addConsoleLog(`Opening music player: ${item.title}`)
         break
       case 'media':
         addConsoleLog(`Opening media controls: ${item.title}`)
         break
-      case 'device':
-        addConsoleLog(`Opening device management: ${item.title}`)
-        break
-      case 'sharing':
-        addConsoleLog(`Opening file sharing: ${item.title}`)
-        break
-      case 'apps':
-        addConsoleLog(`Opening apps & plugins: ${item.title}`)
+      case 'options':
+        addConsoleLog(`Opening options: ${item.title}`)
         break
       default:
         addConsoleLog(`Unknown navigation: ${viewId}`)
@@ -114,42 +106,63 @@ function App() {
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'console':
+      case 'music':
         return (
-          <div className="main-content">
-            <div className="p-4">
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Music Player</h2>
+              <p className="text-green-200 mb-8 text-lg">Play music from Spotify, YouTube Music, Apple Music & Copyparty</p>
+              <div className="space-y-4">
+                <p className="text-green-300">Share songs using Boop</p>
+                <p className="text-green-400">Stream from multiple services</p>
+              </div>
               <button
                 onClick={() => setCurrentView('navigation')}
-                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                className="mt-8 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xl font-semibold"
               >
                 ← Back to Navigation
               </button>
             </div>
-            <ConsolePanel consoleLogs={consoleLogs} ref={consoleRef} />
           </div>
         )
       case 'media':
         return (
-          <MediaControls onBack={() => setCurrentView('navigation')} />
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Media Controls</h2>
+              <p className="text-blue-200 mb-8 text-lg">Control media playback on other devices</p>
+              <div className="space-y-4">
+                <p className="text-blue-300">Android, Apple TV, Jellyfin, Plex</p>
+                <p className="text-blue-400">Universal remote control</p>
+              </div>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
         )
-      case 'device':
+      case 'options':
         return (
-          <DeviceManagement
-            onBack={() => setCurrentView('navigation')}
-            deviceInfo={deviceInfo}
-            onRefreshDeviceInfo={handleRefreshDeviceInfo}
-            onChangePin={handleChangePin}
-            onDisablePin={handleDisablePin}
-            onEnablePin={handleEnablePin}
-          />
-        )
-      case 'sharing':
-        return (
-          <FileSharing onBack={() => setCurrentView('navigation')} />
-        )
-      case 'apps':
-        return (
-          <AppsManagement onBack={() => setCurrentView('navigation')} />
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Options</h2>
+              <p className="text-gray-200 mb-8 text-lg">Settings, device management, and configuration</p>
+              <div className="space-y-4">
+                <p className="text-gray-300">Device settings</p>
+                <p className="text-gray-400">PIN management</p>
+                <p className="text-gray-400">Storage configuration</p>
+              </div>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
         )
       default:
         return (
