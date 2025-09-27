@@ -10,4 +10,4 @@
 - Support for web radios  
 - AirPlay support (research required)  
 - MP3 player mode with an *iPod-like experience*, including scroll wheel and Push-to-Talk button, designed with an Osu-inspired interface  
-- Boop Share: fast sharing via high-frequency audio  
+- Boop Share: fast sharing via high-frequency audio  (https://github.com/AidanTheBandit/Boop-Share)
