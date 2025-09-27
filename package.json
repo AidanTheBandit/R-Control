@@ -1,0 +1,19 @@
+{
+  "name": "r-control-monorepo",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:r1": "pnpm --filter r1-plugin dev",
+    "dev:control": "pnpm --filter control-panel dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build:r1": "pnpm --filter r1-plugin build",
+    "build:control": "pnpm --filter control-panel build",
+    "build:backend": "pnpm --filter backend build"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

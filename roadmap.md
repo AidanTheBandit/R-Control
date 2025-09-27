@@ -29,6 +29,7 @@ R-Control One is a dedicated music playback device and media controller built as
 
 ### Basic UI Framework
 - [ ] Design Osu-inspired rhythm game UI optimized for 240x282px R1 display
+- [ ] Implement scroll carousel component for blade-based navigation
 - [ ] Implement scroll wheel navigation for options, playlists, and songs
 - [ ] Create custom components with dynamic backgrounds and blade-based layouts
 - [ ] Implement hardware-accelerated CSS and minimal DOM operations
