@@ -1,12 +1,13 @@
-# R-Control
-One device to do it all
 
-features:
-KDE-Connect like experiance
-Support media controls for Android/Apple TV, Jelyyfin, Plex, and other media systems
-CopyParty support
-Play music from Spotify, YouTube Music (with injected adblock), Apple Music, and other foss music servers
-Support for web-radios
-AirPlay (will require research)?
-MP3 player mode (iPod like experiance using scroll wheel and ptt button. Osu like design)
-Boop share (sharing using high frequency audio)
+# R-Control One  
+*A single device to do it all.*  
+
+### Features  
+- KDE Connect–like experience for seamless device integration  
+- Media controls for Android, Apple TV, Jellyfin, Plex, and other media systems  
+- CopyParty support for easy file sharing  
+- Music playback from Spotify, YouTube Music (with built-in adblocker), Apple Music, and various FOSS music servers  
+- Support for web radios  
+- AirPlay support (research required)  
+- MP3 player mode with an *iPod-like experience*, including scroll wheel and Push-to-Talk button, designed with an Osu-inspired interface  
+- Boop Share: fast sharing via high-frequency audio  
