@@ -28,10 +28,10 @@ const MainNavigation = ({ onNavigate }) => {
     },
   ]
 
-  const handleAction = (action, item, index) => {
-    console.log('Action triggered:', action, 'for item:', item)
+  const handleItemSelect = (item, index) => {
+    console.log('Selected navigation item:', item)
     if (onNavigate) {
-      onNavigate(item.id, item, action)
+      onNavigate(item.id, item)
     }
   }
 
@@ -57,7 +57,6 @@ const MainNavigation = ({ onNavigate }) => {
             handleItemSelect(item, index)
             handleItemChange(item, index)
           }}
-          onAction={handleAction}
           itemHeight={100}
           maxVisibleItems={5}
           className="h-[600px]"

@@ -140,7 +140,7 @@ const SongCarousel = ({
   }
 
   const moveSelection = useCallback(
-    (direction) => {
+    (direction, triggerCallback = true) => {
       const newIndex = selectedIndex + direction
       if (newIndex >= 0 && newIndex < items.length) {
         setIsAnimating(true)
@@ -148,7 +148,7 @@ const SongCarousel = ({
 
         setTimeout(() => setIsAnimating(false), 500)
 
-        if (onItemSelect) {
+        if (triggerCallback && onItemSelect) {
           onItemSelect(items[newIndex], newIndex)
         }
       }
@@ -163,10 +163,10 @@ const SongCarousel = ({
         setSelectedIndex(index)
 
         setTimeout(() => setIsAnimating(false), 500)
-
-        if (onItemSelect) {
-          onItemSelect(items[index], index)
-        }
+      }
+      // Always trigger callback on click
+      if (onItemSelect) {
+        onItemSelect(items[index], index)
       }
     },
     [selectedIndex, items, onItemSelect],
@@ -176,10 +176,15 @@ const SongCarousel = ({
     const handleKeyDown = (e) => {
       if (e.key === "ArrowUp") {
         e.preventDefault()
-        moveSelection(-1)
+        moveSelection(-1, false) // Don't trigger callback on arrow keys
       } else if (e.key === "ArrowDown") {
         e.preventDefault()
-        moveSelection(1)
+        moveSelection(1, false) // Don't trigger callback on arrow keys
+      } else if (e.key === "Enter") {
+        e.preventDefault()
+        if (onItemSelect) {
+          onItemSelect(items[selectedIndex], selectedIndex)
+        }
       }
     }
 
@@ -191,9 +196,9 @@ const SongCarousel = ({
       setLastScrollTime(now)
 
       if (e.deltaY > 0) {
-        moveSelection(1)
+        moveSelection(1, false) // Don't trigger callback on scroll
       } else {
-        moveSelection(-1)
+        moveSelection(-1, false) // Don't trigger callback on scroll
       }
     }
 
@@ -215,7 +220,7 @@ const SongCarousel = ({
   }
 
   return (
-    <div className={cn("relative w-full h-full", className)}>
+    <div className={cn("relative w-full h-full overflow-hidden", className)}>
       <div className="absolute right-0 top-1/2 -translate-y-1/2 h-full flex flex-col justify-center items-end perspective-1000">
         <div className="relative h-[500px] w-[650px]">
           {items.map((item, index) => {
