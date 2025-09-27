@@ -1,11 +1,12 @@
 # R-Control One Roadmap
 
 ## Overview
-R-Control One is a comprehensive media control and device integration platform built as an R1/RabbitOS plugin using the r1-create SDK. This provides full hardware access, AI integration, and mobile optimization for the R1 device. The system includes a hosted backend for secure multi-tenant data management, allowing multiple users to access personalized services while maintaining complete data isolation. This roadmap outlines the development phases for building a secure, feature-rich plugin using a JavaScript monorepo with React UI components and Node.js backend.
+R-Control One is a dedicated music playback device and media controller built as an R1/RabbitOS plugin using the r1-create SDK. The core focus is seamless music playback with Osu-inspired UI featuring scrollable blades, song previews, and dynamic backgrounds that match album colors. Songs can be shared between devices using Boop Share's high-frequency audio transfer. Sensitive user data is stored securely on the device itself, with a separate control panel for management. The system includes minimal backend support for authentication and large file transfers when needed.
 
 ## Core Principles
 - **R1-Create Integration**: Leverage full hardware access (accelerometer, PTT button, scroll wheel) and AI capabilities
-- **Multi-tenant Architecture**: Support multiple users on a hosted backend with complete data isolation
+- **Secure Device Storage**: Store sensitive data locally on R1 device with PIN-based access control
+- **Device-as-Database**: Use R1 device storage as primary data store, no traditional database needed
 - **Security First**: Implement robust authentication, authorization, and data separation
 - **Modular Design**: Build reusable components for different media integrations optimized for 240x282px display
 - **User Isolation**: Each user's data and connections remain completely separate
@@ -16,17 +17,20 @@ R-Control One is a comprehensive media control and device integration platform b
 - [ ] Set up basic plugin scaffolding using createR1App
 - [ ] Install and configure r1-create package
 - [ ] Implement plugin lifecycle management (mount/unmount)
+- [ ] Set up secure device storage for sensitive data
 - [ ] Create TypeScript configuration for full type safety
 
 ### Backend Infrastructure
-- [ ] Initialize Node.js backend for multi-tenant data management
+- [ ] Initialize Node.js backend for API and communication (no database needed)
 - [ ] Implement user authentication system with secure session management
-- [ ] Create database schema for multi-tenant user data isolation
 - [ ] Establish API layer with proper authorization middleware
 - [ ] Set up secure communication between R1 plugin and hosted backend
+- [ ] Create backend support for large media file sharing (for Boop Share limitations)
 
 ### Basic UI Framework
-- [ ] Design React-based UI optimized for 240x282px R1 display using modded shadcn
+- [ ] Design Osu-inspired rhythm game UI optimized for 240x282px R1 display
+- [ ] Implement scroll wheel navigation for options, playlists, and songs
+- [ ] Create custom components with dynamic backgrounds and blade-based layouts
 - [ ] Implement hardware-accelerated CSS and minimal DOM operations
 - [ ] Create component library using R1Component base class
 - [ ] Set up navigation optimized for touch and hardware buttons
@@ -35,10 +39,17 @@ R-Control One is a comprehensive media control and device integration platform b
 ## Phase 2: Control Panel Development
 ### Control Panel Setup
 - [ ] Create separate React app for user control panel
-- [ ] Implement modded shadcn UI components for management interface
+- [ ] Implement modded shadcn UI components with orange theme for management interface
+- [ ] Create custom Osu-inspired components for device management
 - [ ] Set up authentication and user account linking
 - [ ] Create API key management system
 - [ ] Build device management and configuration interface
+
+### Device Pairing & Data Management
+- [ ] Implement device ID and PIN-based pairing system (inspired by R-PlusPlus)
+- [ ] Create interface for updating sensitive data stored on R1 device
+- [ ] Build secure communication channel for device data management
+- [ ] Add PIN verification and device authentication flows
 
 ## Phase 3: Hardware & Device Integration
 ### R1 Hardware Integration
@@ -120,31 +131,20 @@ R-Control One is a comprehensive media control and device integration platform b
 
 ## Phase 7: Specialized Features
 ### MP3 Player Mode
-- [ ] Design iPod-inspired interface optimized for 240x282px display
-- [ ] Implement scroll wheel navigation using r1.hardware scroll events
+- [ ] Design Osu-inspired UI with scrollable blades for song navigation
+- [ ] Implement scroll wheel navigation for blade scrolling and selection
 - [ ] Add Push-to-Talk functionality for voice commands
-- [ ] Create Osu-inspired interaction elements with accelerometer
+- [ ] Create song preview playback on blade hover/focus
+- [ ] Implement dynamic backgrounds that change to match album colors
 - [ ] Build dedicated MP3 playback mode with hardware-accelerated UI
 
 ### Boop Share Integration
 - [ ] Implement high-frequency audio sharing protocol using r1.speaker
 - [ ] Create Boop Share sender/receiver components with microphone input
+- [ ] Focus on song sharing between R1 devices using Boop Share
 - [ ] Add audio-based file transfer capabilities integrated with storage APIs
 - [ ] Optimize Boop Share for R1's audio hardware and small display
-
-## Phase 8: Production Readiness
-### Multi-tenant Scaling
-- [ ] Implement horizontal scaling capabilities
-- [ ] Add load balancing for multiple instances
-- [ ] Create automated backup and recovery systems
-- [ ] Build monitoring dashboards for system health
-- [ ] Optimize resource usage per tenant
-
-### User Experience Polish
-- [ ] Refine UI/UX based on real-world usage
-- [ ] Add accessibility features and improvements
-- [ ] Create comprehensive user documentation
-- [ ] Implement feature usage analytics
+- [ ] Implement backend fallback for large media files exceeding Boop Share limits
 
 ## Ongoing Maintenance
 - [ ] Regular security updates and patches
