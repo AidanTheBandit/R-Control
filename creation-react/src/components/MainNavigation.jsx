@@ -8,7 +8,6 @@ const MainNavigation = ({ onNavigate }) => {
       title: 'Media Controls',
       subtitle: 'Spotify, YouTube Music, Apple Music',
       difficulty: 'normal',
-      stars: 4,
       image: 'linear-gradient(135deg, #1db954 0%, #1ed760 100%)', // Spotify green
     },
     {
@@ -16,7 +15,6 @@ const MainNavigation = ({ onNavigate }) => {
       title: 'Device Management',
       subtitle: 'Storage, PIN, Settings',
       difficulty: 'hard',
-      stars: 3,
       image: 'linear-gradient(135deg, #007acc 0%, #005999 100%)', // Blue
     },
     {
@@ -24,7 +22,6 @@ const MainNavigation = ({ onNavigate }) => {
       title: 'File Sharing',
       subtitle: 'CopyParty & Boop Share',
       difficulty: 'expert',
-      stars: 5,
       image: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)', // Orange
     },
     {
@@ -32,7 +29,6 @@ const MainNavigation = ({ onNavigate }) => {
       title: 'Apps & Plugins',
       subtitle: 'MCP Servers, Extensions',
       difficulty: 'insane',
-      stars: 6,
       image: 'linear-gradient(135deg, #9c27b0 0%, #673ab7 100%)', // Purple
     },
     {
@@ -40,7 +36,6 @@ const MainNavigation = ({ onNavigate }) => {
       title: 'Console & Logs',
       subtitle: 'System monitoring',
       difficulty: 'normal',
-      stars: 2,
       image: 'linear-gradient(135deg, #424242 0%, #212121 100%)', // Gray
     },
   ]
@@ -74,24 +69,15 @@ const MainNavigation = ({ onNavigate }) => {
 
   return (
     <div className="w-full h-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="p-6">
-        <h1 className="text-3xl font-bold text-white mb-2 text-center">
-          R-Control One
-        </h1>
-        <p className="text-slate-400 text-center mb-8">
-          Select an option to continue
-        </p>
-
-        <SongCarousel
-          items={navigationItems}
-          onItemSelect={handleItemSelect}
-          onAction={handleAction}
-          renderActions={renderActions}
-          itemHeight={100}
-          maxVisibleItems={5}
-          className="h-[600px]"
-        />
-      </div>
+      <SongCarousel
+        items={navigationItems}
+        onItemSelect={handleItemSelect}
+        onAction={handleAction}
+        renderActions={renderActions}
+        itemHeight={100}
+        maxVisibleItems={5}
+        className="h-full"
+      />
     </div>
   )
 }

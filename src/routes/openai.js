@@ -25,6 +25,51 @@ function setupOpenAIRoutes(app, io, connectedR1s, pendingRequests, requestDevice
     await handleModelsRequest(req, res, deviceId);
   });
 
+  // Device info endpoint
+  app.get('/:deviceId/v1/device/info', async (req, res) => {
+    const { deviceId } = req.params;
+
+    try {
+      // Check if device exists
+      const deviceInfo = await deviceIdManager.getDeviceInfoFromDB(deviceId);
+      if (!deviceInfo) {
+        return res.status(404).json({ error: { message: 'Device not found', type: 'not_found' } });
+      }
+
+      // Check PIN authentication if enabled
+      if (deviceInfo.pin_code) {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          return res.status(401).json({ error: { message: 'PIN authentication required', type: 'auth_error' } });
+        }
+
+        const pinCode = authHeader.substring(7);
+        if (pinCode !== deviceInfo.pin_code) {
+          return res.status(403).json({ error: { message: 'Invalid PIN code', type: 'auth_error' } });
+        }
+      }
+
+      // Get device connection status
+      const isConnected = connectedR1s.has(deviceId);
+
+      // Mock device info (in a real implementation, this would come from the device)
+      const deviceData = {
+        deviceId: deviceId,
+        battery: 85, // Mock battery level
+        storageUsed: '2.4 GB',
+        storageTotal: '8 GB',
+        connected: isConnected,
+        lastSeen: deviceInfo.last_seen || new Date().toISOString(),
+        pinEnabled: !!deviceInfo.pin_code
+      };
+
+      res.json(deviceData);
+    } catch (error) {
+      console.error('Error fetching device info:', error);
+      res.status(500).json({ error: { message: 'Internal server error', type: 'server_error' } });
+    }
+  });
+
   // Enable PIN for a device
   app.post('/:deviceId/enable-pin', async (req, res) => {
     const { deviceId } = req.params;

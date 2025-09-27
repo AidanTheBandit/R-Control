@@ -65,44 +65,6 @@ const SongCarousel = ({
     extra: "from-pink-500 to-pink-700",
   }
 
-  const StarRating = ({ stars }) => {
-    const fullStars = Math.floor(stars)
-    const hasHalf = stars % 1 !== 0
-    const emptyStars = 6 - Math.ceil(stars)
-
-    return (
-      <div className="flex gap-0.5">
-        {Array.from({ length: fullStars }).map((_, i) => (
-          <div
-            key={`full-${i}`}
-            className="w-3 h-3 bg-yellow-400"
-            style={{
-              clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-            }}
-          />
-        ))}
-        {hasHalf && (
-          <div
-            className="w-3 h-3"
-            style={{
-              background: "linear-gradient(90deg, #fbbf24 50%, #6b7280 50%)",
-              clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-            }}
-          />
-        )}
-        {Array.from({ length: emptyStars }).map((_, i) => (
-          <div
-            key={`empty-${i}`}
-            className="w-3 h-3 bg-gray-500"
-            style={{
-              clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)",
-            }}
-          />
-        ))}
-      </div>
-    )
-  }
-
   const ActionButton = ({ action, onClick, variant = 'secondary', size = 'sm' }) => {
     const baseClasses = "px-3 py-1 rounded text-xs font-medium transition-colors"
     const variants = {
@@ -218,7 +180,6 @@ const SongCarousel = ({
           <div className="text-white font-bold text-base mb-1 truncate">{itemData.title}</div>
           <div className="text-white/90 text-sm mb-1.5 truncate">{itemData.subtitle}</div>
           <div className="flex items-center justify-between">
-            {itemData.stars > 0 && <StarRating stars={itemData.stars} />}
             <div className="flex gap-2 ml-auto">
               {actions.map((action, actionIndex) => (
                 <ActionButton

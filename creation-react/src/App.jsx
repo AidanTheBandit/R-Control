@@ -3,6 +3,10 @@ import './App.css'
 import StatusBar from './components/StatusBar'
 import ConsolePanel from './components/ConsolePanel'
 import MainNavigation from './components/MainNavigation'
+import MediaControls from './components/MediaControls'
+import DeviceManagement from './components/DeviceManagement'
+import FileSharing from './components/FileSharing'
+import AppsManagement from './components/AppsManagement'
 import { useConsole } from './hooks/useConsole'
 import { useSocket } from './hooks/useSocket'
 import { useR1SDK } from './hooks/useR1SDK'
@@ -126,63 +130,26 @@ function App() {
         )
       case 'media':
         return (
-          <div className="main-content flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Media Controls</h2>
-              <p className="text-slate-400 mb-6">Coming soon...</p>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
+          <MediaControls onBack={() => setCurrentView('navigation')} />
         )
       case 'device':
         return (
-          <div className="main-content flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Device Management</h2>
-              <p className="text-slate-400 mb-6">Coming soon...</p>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
+          <DeviceManagement
+            onBack={() => setCurrentView('navigation')}
+            deviceInfo={deviceInfo}
+            onRefreshDeviceInfo={handleRefreshDeviceInfo}
+            onChangePin={handleChangePin}
+            onDisablePin={handleDisablePin}
+            onEnablePin={handleEnablePin}
+          />
         )
       case 'sharing':
         return (
-          <div className="main-content flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">File Sharing</h2>
-              <p className="text-slate-400 mb-6">Coming soon...</p>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
+          <FileSharing onBack={() => setCurrentView('navigation')} />
         )
       case 'apps':
         return (
-          <div className="main-content flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Apps & Plugins</h2>
-              <p className="text-slate-400 mb-6">Coming soon...</p>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
+          <AppsManagement onBack={() => setCurrentView('navigation')} />
         )
       default:
         return (
@@ -193,17 +160,6 @@ function App() {
 
   return (
     <div className="app">
-      <StatusBar
-        isConnected={isConnected}
-        deviceId={deviceId}
-        deviceInfo={deviceInfo}
-        onRefreshDeviceInfo={handleRefreshDeviceInfo}
-        onReconnect={handleReconnect}
-        onChangePin={handleChangePin}
-        onDisablePin={handleDisablePin}
-        onEnablePin={handleEnablePin}
-      />
-
       {/* Main Content */}
       {renderCurrentView()}
     </div>
