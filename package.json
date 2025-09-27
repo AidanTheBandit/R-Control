@@ -1,9 +1,6 @@
 {
   "name": "r-control-monorepo",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
   "scripts": {
     "dev:r1": "pnpm --filter r1-plugin dev",
     "dev:control": "pnpm --filter control-panel dev",
