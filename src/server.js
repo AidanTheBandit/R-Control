@@ -8,16 +8,11 @@ const http = require('http');
 require('dotenv').config();
 
 // Import modular components
-const { setupOpenAIRoutes } = require('./routes/openai');
-const { setupMagicCamRoutes } = require('./routes/magic-cam');
 const { setupHealthRoutes } = require('./routes/health');
 const { setupDebugRoutes } = require('./routes/debug');
-const { setupMCPRoutes } = require('./routes/mcp');
-const { setupTwilioRoutes } = require('./routes/twilio');
 const { setupSocketHandler } = require('./socket/socket-handler');
 const { DeviceIdManager } = require('./utils/device-id-manager');
 const { DatabaseManager } = require('./utils/database');
-const { MCPManager } = require('./utils/mcp-manager');
 const PluginManager = require('./plugins/plugin-manager');
 
 const app = express();
@@ -45,7 +40,6 @@ const performanceMetrics = new Map(); // deviceId -> metrics array
 // Initialize database and device ID manager
 const database = new DatabaseManager();
 const deviceIdManager = new DeviceIdManager(database);
-const mcpManager = new MCPManager(database, deviceIdManager);
 
 // Middleware
 app.use(cors());
@@ -55,12 +49,8 @@ app.use(express.json());
 app.set('trust proxy', 1);
 
 // Setup routes FIRST (before static file serving)
-setupOpenAIRoutes(app, io, connectedR1s, pendingRequests, requestDeviceMap, deviceIdManager, mcpManager);
-setupMagicCamRoutes(app, connectedR1s);
 setupHealthRoutes(app, connectedR1s);
 setupDebugRoutes(app, connectedR1s, debugStreams, deviceLogs, debugDataStore, performanceMetrics);
-setupMCPRoutes(app, io, connectedR1s, mcpManager, deviceIdManager);
-setupTwilioRoutes(app, io, connectedR1s, pendingRequests, requestDeviceMap, database);
 
 // Serve React creation assets from root for proper loading
 app.use('/assets', express.static(path.join(__dirname, '..', 'creation-react', 'dist', 'assets'), {
@@ -739,7 +729,7 @@ app.post('/:deviceId/change-pin', async (req, res) => {
 });
 
 // Setup socket handler
-setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap, debugStreams, deviceLogs, debugDataStore, performanceMetrics, deviceIdManager, mcpManager);
+setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap, debugStreams, deviceLogs, debugDataStore, performanceMetrics, deviceIdManager);
 
 // Plugin system
 const pluginManager = new PluginManager();
@@ -753,8 +743,7 @@ const sharedState = {
   deviceLogs,
   debugDataStore,
   performanceMetrics,
-  deviceIdManager,
-  mcpManager
+  deviceIdManager
 };
 
 pluginManager.initPlugins(app, io, sharedState);
@@ -786,17 +775,12 @@ const checkBuilds = () => {
 database.init().then(async () => {
   console.log('Database initialized successfully');
   
-  // Initialize MCP manager after database is ready
-  await mcpManager.initialize();
-  console.log('MCP manager initialized successfully');
-  
   checkBuilds();
 
   server.listen(PORT, () => {
     console.log(`🚀 R-API server running on http://localhost:${PORT}`);
     console.log(`📡 Socket.IO server available at /socket.io (WebSocket+polling compatible)`);
     console.log(`🎛️  React Control Panel available at http://localhost:${PORT}`);
-    console.log(`🔌 MCP Management available at http://localhost:${PORT} (MCP Servers tab)`);
     console.log(`🎨 Creation React UI available at http://localhost:${PORT}/creation`);
     console.log(`🔗 Device-specific API at http://localhost:${PORT}/[device-id]/v1/chat/completions`);
     console.log(`🔧 Loaded plugins: ${pluginManager.getAllPlugins().join(', ') || 'none'}`);
@@ -830,22 +814,6 @@ async function gracefulShutdown(signal) {
   console.log('💡 Press Ctrl+C again to force immediate shutdown');
   
   try {
-    // Shutdown MCP manager first with timeout
-    if (mcpManager) {
-      console.log('🔄 Shutting down MCP manager...');
-      const mcpShutdownPromise = mcpManager.shutdown();
-      const mcpTimeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('MCP shutdown timeout')), 5000)
-      );
-      
-      try {
-        await Promise.race([mcpShutdownPromise, mcpTimeout]);
-        console.log('✅ MCP servers shut down');
-      } catch (error) {
-        console.log('⚠️ MCP shutdown timed out, continuing...');
-      }
-    }
-    
     // Close database connection
     if (database) {
       try {

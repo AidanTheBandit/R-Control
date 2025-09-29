@@ -181,16 +181,33 @@ export function useSocket(addConsoleLog, sendErrorToServer) {
       // Device should now be properly registered for chat completions
     })
 
-    // Handle incoming chat completion requests
-    socketRef.current.on('chat_completion', (data) => {
-      addConsoleLog(`🚨🚨🚨 CHAT COMPLETION EVENT RECEIVED! 🚨🚨🚨`, 'info')
-      addConsoleLog(`📥 Received chat completion request: ${JSON.stringify(data, null, 2)}`)
+    // Handle media control events from control panel
+    socketRef.current.on('media_control', (data) => {
+      addConsoleLog(`🎵 Media control command: ${JSON.stringify(data)}`, 'info')
+      // Emit event for media control handler
+      if (window.handleMediaControl) {
+        window.handleMediaControl(data, socketRef.current, addConsoleLog, sendErrorToServer)
+      }
+    })
 
-      // Emit event for R1 SDK hook to handle
-      if (window.handleChatCompletion) {
-        window.handleChatCompletion(data, socketRef.current, addConsoleLog, sendErrorToServer)
-      } else {
-        addConsoleLog('❌ No chat completion handler available', 'error')
+    socketRef.current.on('music_play', (data) => {
+      addConsoleLog(`🎵 Music play request: ${JSON.stringify(data)}`, 'info')
+      if (window.handleMusicPlay) {
+        window.handleMusicPlay(data, socketRef.current, addConsoleLog, sendErrorToServer)
+      }
+    })
+
+    socketRef.current.on('volume_control', (data) => {
+      addConsoleLog(`🔊 Volume control: ${JSON.stringify(data)}`, 'info')
+      if (window.handleVolumeControl) {
+        window.handleVolumeControl(data, socketRef.current, addConsoleLog, sendErrorToServer)
+      }
+    })
+
+    socketRef.current.on('file_share', (data) => {
+      addConsoleLog(`📁 File share request: ${JSON.stringify(data)}`, 'info')
+      if (window.handleFileShare) {
+        window.handleFileShare(data, socketRef.current, addConsoleLog, sendErrorToServer)
       }
     })
 

@@ -4,7 +4,72 @@ import { r1 } from 'r1-create'
 export function useR1SDK(addConsoleLog, sendErrorToServer, socketRef) {
   const r1CreateRef = useRef(null)
 
-  // Handle chat completion requests from socket
+  // Handle media control commands
+  const handleMediaControl = (data, socket, addLog, sendError) => {
+    addLog(`🎵 Media control command: ${JSON.stringify(data)}`, 'info')
+    
+    // Here we would integrate with the actual media APIs
+    // For now, simulate media control
+    try {
+      switch (data.command) {
+        case 'play_pause':
+          addLog('▶️ Toggle play/pause', 'info')
+          // Simulate media control - in real implementation, this would control the active media player
+          if (typeof navigator !== 'undefined' && navigator.mediaSession) {
+            if (document.querySelector('audio, video')) {
+              const media = document.querySelector('audio, video')
+              if (media.paused) {
+                media.play()
+              } else {
+                media.pause()
+              }
+            }
+          }
+          break
+        case 'next':
+          addLog('⏭️ Next track', 'info')
+          if (navigator.mediaSession) {
+            navigator.mediaSession.setActionHandler('nexttrack', null)
+          }
+          break
+        case 'previous':
+          addLog('⏮️ Previous track', 'info')
+          if (navigator.mediaSession) {
+            navigator.mediaSession.setActionHandler('previoustrack', null)
+          }
+          break
+        case 'volume_up':
+          addLog('🔊 Volume up', 'info')
+          // In real implementation, this would control system volume or media volume
+          break
+        case 'volume_down':
+          addLog('🔉 Volume down', 'info')
+          // In real implementation, this would control system volume or media volume
+          break
+        default:
+          addLog(`Unknown media command: ${data.command}`, 'warn')
+      }
+    } catch (error) {
+      addLog(`❌ Media control error: ${error.message}`, 'error')
+      sendError('error', `Media control failed: ${error.message}`)
+    }
+  }
+
+  const handleVolumeControl = (data, socket, addLog, sendError) => {
+    addLog(`🔊 Volume control: ${data.volume}`, 'info')
+    // Handle volume changes
+  }
+
+  const handleMusicPlay = (data, socket, addLog, sendError) => {
+    addLog(`🎵 Music play request: ${JSON.stringify(data)}`, 'info')
+    // Handle music playback requests
+  }
+
+  const handleFileShare = (data, socket, addLog, sendError) => {
+    addLog(`📁 File share request: ${JSON.stringify(data)}`, 'info')
+    // Handle file sharing
+  }
+
   const handleChatCompletion = (data, socket, addLog, sendError) => {
     const currentRequestId = data.requestId || data.data?.requestId
     const messageToSend = data.message || data.data?.message
@@ -179,11 +244,27 @@ export function useR1SDK(addConsoleLog, sendErrorToServer, socketRef) {
 
     // Set up global handler for socket hook
     window.handleChatCompletion = handleChatCompletion
+    window.handleMediaControl = handleMediaControl
+    window.handleVolumeControl = handleVolumeControl
+    window.handleMusicPlay = handleMusicPlay
+    window.handleFileShare = handleFileShare
 
     // Cleanup
     return () => {
       if (window.handleChatCompletion) {
         delete window.handleChatCompletion
+      }
+      if (window.handleMediaControl) {
+        delete window.handleMediaControl
+      }
+      if (window.handleVolumeControl) {
+        delete window.handleVolumeControl
+      }
+      if (window.handleMusicPlay) {
+        delete window.handleMusicPlay
+      }
+      if (window.handleFileShare) {
+        delete window.handleFileShare
       }
     }
   }, [addConsoleLog, sendErrorToServer, socketRef])

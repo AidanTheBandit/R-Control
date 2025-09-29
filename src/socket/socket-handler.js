@@ -1,7 +1,7 @@
 const { sendOpenAIResponse } = require('../utils/response-utils');
 const { DeviceIdManager } = require('../utils/device-id-manager');
 
-function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap, debugStreams, deviceLogs, debugDataStore, performanceMetrics, deviceIdManager = null, mcpManager = null) {
+function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap, debugStreams, deviceLogs, debugDataStore, performanceMetrics, deviceIdManager = null) {
   // Initialize device ID manager if not provided
   if (!deviceIdManager) {
     deviceIdManager = new DeviceIdManager();
@@ -9,9 +9,6 @@ function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap,
 
   // Get PIN configuration from environment
   const enablePin = process.env.DISABLE_PIN !== 'true'; // Default to enabled, disable if DISABLE_PIN=true
-
-  // Track requests that have had MCP tools executed (for follow-up responses)
-  const mcpToolExecutedRequests = new Set();
 
   // Socket.IO connection handling
   io.on('connection', async (socket) => {
@@ -40,33 +37,6 @@ function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap,
     console.log(`R1 device ${isReconnection ? 'reconnected' : 'connected'}`);
     console.log(`Total connected devices: ${connectedR1s.size}`);
 
-    // Auto-connect enabled MCP servers for this device
-    if (mcpManager && !isReconnection) {
-      try {
-        console.log(`🔌 Auto-connecting MCP servers for device ${deviceId}`);
-        const servers = await mcpManager.getDeviceServers(deviceId);
-        console.log(`📋 Found ${servers.length} servers for device ${deviceId}:`, servers.map(s => ({ name: s.name, enabled: s.enabled, connected: s.connected })));
-        
-        for (const server of servers) {
-          if (server.enabled && !server.connected) {
-            console.log(`🔌 Auto-connecting server: ${server.name} (${server.config?.url})`);
-            try {
-              await mcpManager.initializeServer(deviceId, server.name);
-              console.log(`✅ Auto-connected MCP server: ${server.name}`);
-            } catch (error) {
-              console.error(`❌ Failed to auto-connect MCP server ${server.name}:`, error.message);
-            }
-          } else if (server.enabled && server.connected) {
-            console.log(`ℹ️ Server ${server.name} already connected`);
-          } else {
-            console.log(`⚠️ Server ${server.name} not enabled or already connected`);
-          }
-        }
-      } catch (error) {
-        console.error(`❌ Error auto-connecting MCP servers for ${deviceId}:`, error.message);
-      }
-    }
-
     // Don't broadcast device connections to prevent device ID leakage
 
     // Send welcome message with device ID, PIN code, and device secret for cookie
@@ -86,13 +56,6 @@ function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap,
       console.log(`R1 device disconnected`);
       connectedR1s.delete(deviceId);
       deviceIdManager.unregisterDevice(socket.id);
-
-      // Shutdown MCP servers for this device
-      if (mcpManager) {
-        mcpManager.shutdownDeviceServers(deviceId).catch(error => {
-          console.error(`Error shutting down MCP servers:`, error);
-        });
-      }
 
       console.log(`Total connected devices after disconnect: ${connectedR1s.size}`);
     });
@@ -126,56 +89,35 @@ function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap,
       // Store locally but don't log device IDs
     });
 
-    socket.on('client_log', (data) => {
-      // Store locally but don't log device IDs
-    });
-
-    // MCP-specific event handlers
-    socket.on('mcp_tool_call', async (data) => {
-      console.log(`MCP tool call received`);
-      
-      if (mcpManager) {
-        try {
-          const { serverName, toolName, arguments: toolArgs, requestId } = data;
-          
-          // Handle the tool call using the new prompt injection system
-          const result = await mcpManager.handleToolCall(deviceId, serverName, toolName, toolArgs || {});
-          
-          // Send result back to the R1 device
-          socket.emit('mcp_tool_result', {
-            requestId: requestId || mcpManager.generateId(),
-            serverName,
-            toolName,
-            result,
-            success: true,
-            timestamp: new Date().toISOString()
-          });
-          
-          // Don't broadcast MCP events to prevent device ID leakage
-        } catch (error) {
-          console.error(`Error handling MCP tool call:`, error);
-          
-          // Send error back to the R1 device
-          socket.emit('mcp_tool_result', {
-            requestId: data.requestId || mcpManager.generateId(),
-            serverName: data.serverName,
-            toolName: data.toolName,
-            error: error.message,
-            success: false,
-            timestamp: new Date().toISOString()
-          });
-          
-          socket.emit('mcp_error', {
-            error: error.message,
-            serverName: data.serverName,
-            toolName: data.toolName
-          });
-        }
+    // Handle media control events
+    socket.on('media_control', (data) => {
+      console.log(`🎵 Media control received:`, data);
+      // Forward to the target device
+      const { command, deviceId: targetDeviceId } = data;
+      const targetSocket = connectedR1s.get(targetDeviceId);
+      if (targetSocket) {
+        targetSocket.emit('media_control', {
+          command,
+          timestamp: Date.now()
+        });
+      } else {
+        console.log(`❌ Target device ${targetDeviceId} not connected`);
       }
     });
 
-    socket.on('mcp_server_status', (data) => {
-      console.log(`MCP server status received`);
+    socket.on('music_play', (data) => {
+      console.log(`🎵 Music play request:`, data);
+      // Handle music playback requests
+    });
+
+    socket.on('volume_control', (data) => {
+      console.log(`🔊 Volume control:`, data);
+      // Handle volume changes
+    });
+
+    socket.on('file_share', (data) => {
+      console.log(`📁 File share request:`, data);
+      // Handle file sharing
     });
 
     socket.on('system_info', (data) => {
@@ -250,105 +192,13 @@ function setupSocketHandler(io, connectedR1s, pendingRequests, requestDeviceMap,
           return;
         }
 
-        // Check if this is a follow-up response after MCP tool execution
-        const isMCPFollowUp = mcpToolExecutedRequests.has(requestId);
+        // Clear timeout and remove from pending requests
+        clearTimeout(timeout);
+        pendingRequests.delete(requestId);
+        requestDeviceMap.delete(requestId);
+        console.log(`🗑️ Removed pending request, remaining: ${pendingRequests.size}`);
 
-        // Check if the response contains an MCP tool call
-        let finalResponse = response;
-        let isMCPToolCall = false;
-
-        try {
-          // Strip markdown code blocks if present
-          let cleanResponse = response.trim();
-          if (cleanResponse.startsWith('```json') && cleanResponse.endsWith('```')) {
-            cleanResponse = cleanResponse.slice(7, -3).trim(); // Remove ```json and ```
-          } else if (cleanResponse.startsWith('```') && cleanResponse.endsWith('```')) {
-            cleanResponse = cleanResponse.slice(3, -3).trim(); // Remove ``` and ```
-          }
-
-          // Try to parse the response as JSON to check for mcp_tool_call
-          const parsedResponse = JSON.parse(cleanResponse);
-          if (parsedResponse && parsedResponse.mcp_tool_call) {
-            console.log(`🔧 MCP tool call detected in response`);
-            isMCPToolCall = true;
-
-            const { server: serverName, tool: toolName, arguments: toolArgs } = parsedResponse.mcp_tool_call;
-
-            if (mcpManager) {
-              try {
-                // Execute the MCP tool
-                const toolResult = await mcpManager.handleToolCall(deviceId, serverName, toolName, toolArgs || {});
-
-                // Mark this request as having had an MCP tool executed
-                mcpToolExecutedRequests.add(requestId);
-
-                // Send the tool result back to the R1 device for final response generation
-                socket.emit('mcp_tool_result', {
-                  requestId: requestId,
-                  serverName,
-                  toolName,
-                  result: toolResult,
-                  success: true,
-                  timestamp: new Date().toISOString()
-                });
-
-                // Don't send the response yet - wait for the R1 to generate the final response
-                console.log(`🔄 MCP tool executed, waiting for R1 final response`);
-                return;
-
-              } catch (toolError) {
-                console.error(`❌ MCP tool execution failed:`, toolError);
-
-                // Send error back to R1 device
-                socket.emit('mcp_tool_result', {
-                  requestId: requestId,
-                  serverName,
-                  toolName,
-                  error: toolError.message,
-                  success: false,
-                  timestamp: new Date().toISOString()
-                });
-
-                // Send error response to client
-                clearTimeout(timeout);
-                pendingRequests.delete(requestId);
-                requestDeviceMap.delete(requestId);
-                mcpToolExecutedRequests.delete(requestId);
-
-                res.status(500).json({
-                  error: {
-                    message: `MCP tool execution failed: ${toolError.message}`,
-                    type: 'mcp_error'
-                  }
-                });
-                return;
-              }
-            } else {
-              console.error(`❌ MCP manager not available`);
-              finalResponse = "Sorry, MCP functionality is not available at this time.";
-            }
-          }
-        } catch (parseError) {
-          // Response is not JSON with mcp_tool_call, use as-is
-          console.log(`📝 Response is not MCP tool call, using as normal response`);
-        }
-
-        // If this is not an MCP tool call, or if MCP execution failed, send the response
-        if (!isMCPToolCall) {
-          // If this is a follow-up response after MCP tool execution, clean up the tracking
-          if (isMCPFollowUp) {
-            mcpToolExecutedRequests.delete(requestId);
-            console.log(`✅ Received final response after MCP tool execution`);
-          }
-
-          // Clear timeout and remove from pending requests
-          clearTimeout(timeout);
-          pendingRequests.delete(requestId);
-          requestDeviceMap.delete(requestId);
-          console.log(`🗑️ Removed pending request, remaining: ${pendingRequests.size}`);
-
-          sendOpenAIResponse(res, finalResponse, originalMessage, model, stream);
-        }
+        sendOpenAIResponse(res, response, originalMessage, model, stream);
       }
       else {
         console.log(`❌ No matching requests found for response`);

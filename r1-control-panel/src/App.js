@@ -113,6 +113,23 @@ function App() {
     }
   };
 
+  const sendMediaCommand = async (command) => {
+    if (!socket || !deviceId) {
+      console.error('No socket connection or device ID');
+      return;
+    }
+
+    try {
+      socket.emit('media_control', {
+        command,
+        deviceId,
+        timestamp: Date.now()
+      });
+    } catch (error) {
+      console.error('Failed to send media command:', error);
+    }
+  };
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setDeviceId('');
@@ -198,13 +215,13 @@ function App() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-3 gap-4">
-                    <Button className="w-full">⏮️ Previous</Button>
-                    <Button className="w-full">⏯️ Play/Pause</Button>
-                    <Button className="w-full">⏭️ Next</Button>
+                    <Button onClick={() => sendMediaCommand('previous')} className="w-full">⏮️ Previous</Button>
+                    <Button onClick={() => sendMediaCommand('play_pause')} className="w-full">⏯️ Play/Pause</Button>
+                    <Button onClick={() => sendMediaCommand('next')} className="w-full">⏭️ Next</Button>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
-                    <Button variant="outline" className="w-full">🔊 Volume Up</Button>
-                    <Button variant="outline" className="w-full">🔉 Volume Down</Button>
+                    <Button onClick={() => sendMediaCommand('volume_down')} variant="outline" className="w-full">🔊 Volume Up</Button>
+                    <Button onClick={() => sendMediaCommand('volume_up')} variant="outline" className="w-full">🔉 Volume Down</Button>
                   </div>
                   <div className="pt-4">
                     <Label htmlFor="device-select">Target Device</Label>

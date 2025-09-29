@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
-const MediaControls = ({ onBack }) => {
+const MediaControls = ({ onBack, socket }) => {
   const [currentService, setCurrentService] = useState('spotify')
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTrack, setCurrentTrack] = useState({
@@ -19,16 +19,43 @@ const MediaControls = ({ onBack }) => {
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)
+    if (socket && socket.current) {
+      socket.current.emit('media_control', {
+        action: isPlaying ? 'pause' : 'play',
+        service: currentService,
+        timestamp: Date.now()
+      })
+    }
   }
 
   const handleNext = () => {
-    // TODO: Implement next track
-    console.log('Next track')
+    if (socket && socket.current) {
+      socket.current.emit('media_control', {
+        action: 'next',
+        service: currentService,
+        timestamp: Date.now()
+      })
+    }
   }
 
   const handlePrevious = () => {
-    // TODO: Implement previous track
-    console.log('Previous track')
+    if (socket && socket.current) {
+      socket.current.emit('media_control', {
+        action: 'previous',
+        service: currentService,
+        timestamp: Date.now()
+      })
+    }
+  }
+
+  const handleVolumeChange = (volume) => {
+    if (socket && socket.current) {
+      socket.current.emit('volume_control', {
+        volume: parseInt(volume),
+        service: currentService,
+        timestamp: Date.now()
+      })
+    }
   }
 
   return (
@@ -109,6 +136,7 @@ const MediaControls = ({ onBack }) => {
               min="0"
               max="100"
               defaultValue="50"
+              onChange={(e) => handleVolumeChange(e.target.value)}
               className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
             />
           </div>

@@ -1,33 +1,28 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import MainNavigation from './components/MainNavigation'
+import { useConsole } from './hooks/useConsole'
+import { useSocket } from './hooks/useSocket'
+import { useDeviceManagement } from './hooks/useDeviceManagement'
+import { useR1SDK } from './hooks/useR1SDK'
+import MediaControls from './components/MediaControls'
 
 function App() {
   const [currentView, setCurrentView] = useState('navigation') // 'navigation', 'console', 'media', etc.
 
-  // Temporarily disable hooks to test UI without backend
-  // const { consoleLogs, consoleRef, addConsoleLog, sendErrorToServer } = useConsole()
-  // const {
-  //   isConnected,
-  //   deviceId,
-  //   deviceInfo,
-  //   socketRef,
-  //   connectSocket,
-  //   handleReconnect,
-  //   setDeviceInfo
-  // } = useSocket(addConsoleLog, sendErrorToServer)
-  // const { handleRefreshDeviceInfo, handleDisablePin, handleEnablePin, handleChangePin } = useDeviceManagement(deviceId, deviceInfo, setDeviceInfo, addConsoleLog, sendErrorToServer)
-  // useR1SDK(addConsoleLog, sendErrorToServer, socketRef)
-
-  const consoleLogs = []
-  const consoleRef = { current: null }
-  const addConsoleLog = (msg) => console.log(msg)
-  const sendErrorToServer = (type, msg, stack) => console.error(type, msg, stack)
-  const deviceInfo = {}
-  const handleRefreshDeviceInfo = () => {}
-  const handleDisablePin = () => {}
-  const handleEnablePin = () => {}
-  const handleChangePin = () => {}
+  // Enable hooks for backend functionality
+  const { consoleLogs, consoleRef, addConsoleLog, sendErrorToServer } = useConsole()
+  const {
+    isConnected,
+    deviceId,
+    deviceInfo,
+    socketRef,
+    connectSocket,
+    handleReconnect,
+    setDeviceInfo
+  } = useSocket(addConsoleLog, sendErrorToServer)
+  const { handleRefreshDeviceInfo, handleDisablePin, handleEnablePin, handleChangePin } = useDeviceManagement(deviceId, deviceInfo, setDeviceInfo, addConsoleLog, sendErrorToServer)
+  useR1SDK(addConsoleLog, sendErrorToServer, socketRef)
 
   // Initialize on mount
   useEffect(() => {
@@ -59,7 +54,7 @@ function App() {
     })
 
     // Skip socket connection for UI testing
-    // connectSocket()
+    connectSocket()
 
     // Cleanup
     return () => {
@@ -140,20 +135,7 @@ function App() {
           </div>
         )
       case 'media':
-        return (
-          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-red-900">
-            <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">Media Controls</h2>
-              <p className="text-red-200 mb-8 text-lg">Control media playback</p>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="mt-8 px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xl font-semibold"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
-        )
+        return <MediaControls onBack={() => setCurrentView('navigation')} socket={socketRef} />
       case 'console':
         return (
           <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-yellow-900 via-yellow-800 to-yellow-900">
