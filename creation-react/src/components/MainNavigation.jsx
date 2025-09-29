@@ -1,69 +1,34 @@
-import { useState } from 'react'
-import SongCarousel from './song-carousel'
+import Carousel from './Carousel'
 
-const MainNavigation = ({ onNavigate }) => {
-  const [backgroundGradient, setBackgroundGradient] = useState('linear-gradient(135deg, #667eea 0%, #764ba2 100%)')
+const menuItems = [
+  { title: "Apps Management", subtitle: "Manage your applications", image: "https://via.placeholder.com/80x80/FF6B6B/FFFFFF?text=Apps" },
+  { title: "Device Info", subtitle: "View device information", image: "https://via.placeholder.com/80x80/4ECDC4/FFFFFF?text=Device" },
+  { title: "File Sharing", subtitle: "Share files with device", image: "https://via.placeholder.com/80x80/45B7D1/FFFFFF?text=Files" },
+  { title: "Media Controls", subtitle: "Control media playback", image: "https://via.placeholder.com/80x80/F7DC6F/FFFFFF?text=Media" },
+  { title: "Console Panel", subtitle: "Access console commands", image: "https://via.placeholder.com/80x80/BB8FCE/FFFFFF?text=Console" },
+  { title: "Logs Panel", subtitle: "View system logs", image: "https://via.placeholder.com/80x80/85C1E9/FFFFFF?text=Logs" },
+  { title: "Settings", subtitle: "Configure application", image: "https://via.placeholder.com/80x80/F8C471/FFFFFF?text=Settings" },
+]
 
-  const navigationItems = [
-    {
-      id: 'music',
-      title: 'Music',
-      subtitle: 'Play from Spotify, YouTube Music, Apple Music & Copyparty',
-      difficulty: 'normal',
-      image: 'linear-gradient(135deg, #1db954 0%, #1ed760 100%)', // Spotify green
-    },
-    {
-      id: 'media',
-      title: 'Media Controls',
-      subtitle: 'Control media playback on other devices',
-      difficulty: 'hard',
-      image: 'linear-gradient(135deg, #007acc 0%, #005999 100%)', // Blue
-    },
-    {
-      id: 'options',
-      title: 'Options',
-      subtitle: 'Settings, device management, and configuration',
-      difficulty: 'expert',
-      image: 'linear-gradient(135deg, #424242 0%, #212121 100%)', // Gray
-    },
-  ]
-
+export default function MainNavigation({ onNavigate }) {
   const handleItemSelect = (item, index) => {
-    console.log('Selected navigation item:', item)
-    if (onNavigate) {
-      onNavigate(item.id, item)
+    // Map item titles to view IDs
+    const viewMap = {
+      "Apps Management": "apps",
+      "Device Info": "device",
+      "File Sharing": "files",
+      "Media Controls": "media",
+      "Console Panel": "console",
+      "Logs Panel": "logs",
+      "Settings": "settings",
     }
-  }
-
-  const handleItemChange = (item, index) => {
-    // Update background based on selected item
-    const gradients = {
-      music: 'linear-gradient(135deg, #1db954 0%, #1ed760 100%)',
-      media: 'linear-gradient(135deg, #007acc 0%, #005999 100%)',
-      options: 'linear-gradient(135deg, #424242 0%, #212121 100%)',
-    }
-    setBackgroundGradient(gradients[item.id] || 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)')
+    const viewId = viewMap[item.title] || "navigation"
+    onNavigate(viewId, item, "select")
   }
 
   return (
-    <div
-      className="w-full h-full transition-all duration-1000 ease-in-out"
-      style={{ background: backgroundGradient }}
-    >
-      <div className="p-6">
-        <SongCarousel
-          items={navigationItems}
-          onItemSelect={(item, index) => {
-            handleItemSelect(item, index)
-            handleItemChange(item, index)
-          }}
-          itemHeight={100}
-          maxVisibleItems={5}
-          className="h-[600px]"
-        />
-      </div>
+    <div className="w-full h-screen bg-black">
+      <Carousel items={menuItems} onItemSelect={handleItemSelect} />
     </div>
   )
 }
-
-export default MainNavigation

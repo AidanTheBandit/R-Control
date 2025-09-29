@@ -106,6 +106,38 @@ function App() {
 
   const renderCurrentView = () => {
     switch (currentView) {
+      case 'apps':
+        return <AppsManagement onBack={() => setCurrentView('navigation')} />
+      case 'device':
+        return <DeviceManagement onBack={() => setCurrentView('navigation')} deviceInfo={deviceInfo} onRefreshDeviceInfo={handleRefreshDeviceInfo} onDisablePin={handleDisablePin} onEnablePin={handleEnablePin} onChangePin={handleChangePin} />
+      case 'files':
+        return <FileSharing onBack={() => setCurrentView('navigation')} />
+      case 'media':
+        return <MediaControls onBack={() => setCurrentView('navigation')} />
+      case 'console':
+        return <ConsolePanel onBack={() => setCurrentView('navigation')} consoleLogs={consoleLogs} consoleRef={consoleRef} />
+      case 'logs':
+        return <LogsPanel onBack={() => setCurrentView('navigation')} />
+      case 'settings':
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Settings</h2>
+              <p className="text-gray-200 mb-8 text-lg">Settings, device management, and configuration</p>
+              <div className="space-y-4">
+                <p className="text-gray-300">Device settings</p>
+                <p className="text-gray-400">PIN management</p>
+                <p className="text-gray-400">Storage configuration</p>
+              </div>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'music':
         return (
           <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
@@ -119,25 +151,6 @@ function App() {
               <button
                 onClick={() => setCurrentView('navigation')}
                 className="mt-8 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xl font-semibold"
-              >
-                ← Back to Navigation
-              </button>
-            </div>
-          </div>
-        )
-      case 'media':
-        return (
-          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-            <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">Media Controls</h2>
-              <p className="text-blue-200 mb-8 text-lg">Control media playback on other devices</p>
-              <div className="space-y-4">
-                <p className="text-blue-300">Android, Apple TV, Jellyfin, Plex</p>
-                <p className="text-blue-400">Universal remote control</p>
-              </div>
-              <button
-                onClick={() => setCurrentView('navigation')}
-                className="mt-8 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xl font-semibold"
               >
                 ← Back to Navigation
               </button>

@@ -399,6 +399,39 @@ body {
 }
 
 .console-stats {
+
+/* Navigation compact state when page is scrolled */
+.main-navigation {
+  transition: background 0.35s cubic-bezier(.22,.9,.3,1), padding 0.25s cubic-bezier(.22,.9,.3,1), height 0.25s cubic-bezier(.22,.9,.3,1);
+}
+.main-navigation.compact .main-navigation-inner {
+  padding: 8px !important;
+  transform: translateY(-8px);
+  opacity: 0.95;
+}
+
+/* Song carousel enter animations */
+.song-card {
+  will-change: transform;
+  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.song-carousel-animate .song-card {
+  opacity: 0;
+  transform: scale(0.8) rotate(10deg);
+}
+
+.song-carousel-animate.in-viewport .song-card {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+/* stagger based on --i custom property (index) */
+.song-carousel-animate .song-card {
+  transition-delay: calc(var(--i) * 100ms);
+}
+
+
   display: flex;
   align-items: center;
   gap: var(--space-xs);
@@ -579,6 +612,36 @@ body {
   .console-content {
     padding: var(--space-xs);
   }
+
+/* Navigation compact state when page scrolls */
+.main-navigation {
+  transition: padding 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+}
+.main-navigation-inner {
+  transition: transform 300ms ease, opacity 300ms ease;
+}
+.main-navigation.compact {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.45);
+  transform: translateY(-6px);
+}
+.main-navigation.compact .main-navigation-inner {
+  transform: scale(0.98);
+  opacity: 0.95;
+}
+
+/* Song carousel enter animation */
+.song-carousel-animate {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  transition: opacity 420ms cubic-bezier(.2,.9,.2,1), transform 420ms cubic-bezier(.2,.9,.2,1);
+}
+.song-carousel-animate.in-viewport {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
   
   .console-entry {
     font-size: 11px;
