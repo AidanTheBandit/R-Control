@@ -17,6 +17,7 @@ export default defineConfig({
     minify: false, // Disable minification for debugging
   },
   server: {
+    port: 3000, // Change to 3000
     proxy: {
       '/socket.io': {
         target: 'http://localhost:5482',

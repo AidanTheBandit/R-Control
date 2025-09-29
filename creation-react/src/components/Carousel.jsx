@@ -42,55 +42,48 @@ function ItemCard({
 
   const getCardStyles = () => {
     const baseClasses =
-      "absolute right-0 h-20 rounded-l-lg flex items-center cursor-pointer overflow-hidden transition-all duration-500 ease-out transform-gpu"
+      "absolute right-0 h-20 rounded-l-lg flex items-center cursor-pointer overflow-hidden transition-transform duration-500 ease-out transform-gpu"
 
     switch (position) {
       case 0: // Center card - fully expanded
         return cn(
           baseClasses,
           "w-[600px] z-50 translate-x-0 scale-100 opacity-100 shadow-2xl",
-          isAnimating && "transition-all duration-500 ease-out",
         )
       case 1:
       case -1: // Adjacent cards
         return cn(
           baseClasses,
           "w-[550px] z-40 translate-x-8 scale-[0.97] opacity-95",
-          isAnimating && "transition-all duration-450 ease-out",
         )
       case 2:
       case -2: // Second tier
         return cn(
           baseClasses,
           "w-[500px] z-30 translate-x-16 scale-[0.94] opacity-85",
-          isAnimating && "transition-all duration-400 ease-out",
         )
       case 3:
       case -3: // Third tier
         return cn(
           baseClasses,
           "w-[450px] z-20 translate-x-24 scale-[0.91] opacity-75",
-          isAnimating && "transition-all duration-350 ease-out",
         )
       case 4:
       case -4: // Fourth tier
         return cn(
           baseClasses,
           "w-[400px] z-10 translate-x-32 scale-[0.88] opacity-65",
-          isAnimating && "transition-all duration-300 ease-out",
         )
       case 5:
       case -5: // Fifth tier
         return cn(
           baseClasses,
           "w-[350px] z-5 translate-x-40 scale-[0.85] opacity-55",
-          isAnimating && "transition-all duration-250 ease-out",
         )
       default: // Hidden cards
         return cn(
           baseClasses,
           "w-[300px] z-0 translate-x-52 scale-75 opacity-0",
-          isAnimating && "transition-all duration-200 ease-out",
         )
     }
   }
@@ -103,7 +96,9 @@ function ItemCard({
       )}
       onClick={onClick}
       style={{
-        top: `${position * 82 + 250}px`,
+        position: 'absolute',
+        right: 0,
+        transform: `translateY(${position * 82 + 250}px)`,
         transformOrigin: "right center",
         backgroundImage: `${gradient}, url(${item.image || item.icon || 'https://via.placeholder.com/80x80/333/FFF'})`,
         backgroundSize: 'cover, cover',
@@ -134,12 +129,10 @@ export default function Carousel({ items = defaultItems, onItemSelect, className
 
         setTimeout(() => setIsAnimating(false), 500)
 
-        if (onItemSelect) {
-          onItemSelect(items[newIndex], newIndex)
-        }
+        // Removed onItemSelect call here, only on click
       }
     },
-    [selectedIndex, items, onItemSelect],
+    [selectedIndex, items],
   )
 
   const handleCardClick = useCallback(
@@ -183,6 +176,7 @@ export default function Carousel({ items = defaultItems, onItemSelect, className
       }
     }
 
+    // Attach to document for global control
     document.addEventListener("keydown", handleKeyDown)
     document.addEventListener("wheel", handleWheel, { passive: false })
 

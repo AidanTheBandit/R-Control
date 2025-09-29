@@ -1,48 +1,37 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import StatusBar from './components/StatusBar'
-import ConsolePanel from './components/ConsolePanel'
 import MainNavigation from './components/MainNavigation'
-import MediaControls from './components/MediaControls'
-import DeviceManagement from './components/DeviceManagement'
-import FileSharing from './components/FileSharing'
-import AppsManagement from './components/AppsManagement'
-import { useConsole } from './hooks/useConsole'
-import { useSocket } from './hooks/useSocket'
-import { useR1SDK } from './hooks/useR1SDK'
-import { useDeviceManagement } from './hooks/useDeviceManagement'
 
 function App() {
   const [currentView, setCurrentView] = useState('navigation') // 'navigation', 'console', 'media', etc.
 
-  // Console logging hook
-  const { consoleLogs, consoleRef, addConsoleLog, sendErrorToServer } = useConsole()
+  // Temporarily disable hooks to test UI without backend
+  // const { consoleLogs, consoleRef, addConsoleLog, sendErrorToServer } = useConsole()
+  // const {
+  //   isConnected,
+  //   deviceId,
+  //   deviceInfo,
+  //   socketRef,
+  //   connectSocket,
+  //   handleReconnect,
+  //   setDeviceInfo
+  // } = useSocket(addConsoleLog, sendErrorToServer)
+  // const { handleRefreshDeviceInfo, handleDisablePin, handleEnablePin, handleChangePin } = useDeviceManagement(deviceId, deviceInfo, setDeviceInfo, addConsoleLog, sendErrorToServer)
+  // useR1SDK(addConsoleLog, sendErrorToServer, socketRef)
 
-  // Socket connection hook
-  const {
-    isConnected,
-    deviceId,
-    deviceInfo,
-    socketRef,
-    connectSocket,
-    handleReconnect,
-    setDeviceInfo
-  } = useSocket(addConsoleLog, sendErrorToServer)
-
-  // R1 SDK hook
-  useR1SDK(addConsoleLog, sendErrorToServer, socketRef)
-
-  // Device management hook
-  const {
-    handleRefreshDeviceInfo,
-    handleDisablePin,
-    handleEnablePin,
-    handleChangePin
-  } = useDeviceManagement(deviceId, deviceInfo, setDeviceInfo, addConsoleLog, sendErrorToServer)
+  const consoleLogs = []
+  const consoleRef = { current: null }
+  const addConsoleLog = (msg) => console.log(msg)
+  const sendErrorToServer = (type, msg, stack) => console.error(type, msg, stack)
+  const deviceInfo = {}
+  const handleRefreshDeviceInfo = () => {}
+  const handleDisablePin = () => {}
+  const handleEnablePin = () => {}
+  const handleChangePin = () => {}
 
   // Initialize on mount
   useEffect(() => {
-    addConsoleLog('R1 Anywhere Console initialized')
+    addConsoleLog('R1 Anywhere Console initialized (backend disabled for UI testing)')
 
     // Override console methods for error logging
     const originalConsoleError = console.error
@@ -50,8 +39,7 @@ function App() {
 
     console.error = (...args) => {
       const message = args.join(' ')
-      const stack = new Error().stack
-      sendErrorToServer('error', message, stack)
+      sendErrorToServer('error', message)
       originalConsoleError.apply(console, args)
     }
 
@@ -70,19 +58,19 @@ function App() {
       sendErrorToServer('error', `Unhandled promise rejection: ${event.reason}`, event.reason?.stack)
     })
 
-    // Connect socket after hooks are initialized
-    connectSocket()
+    // Skip socket connection for UI testing
+    // connectSocket()
 
     // Cleanup
     return () => {
-      if (socketRef.current) {
-        if (socketRef.current._heartbeatInterval) {
-          clearInterval(socketRef.current._heartbeatInterval)
-        }
-        socketRef.current.disconnect()
-      }
+      // if (socketRef.current) {
+      //   if (socketRef.current._heartbeatInterval) {
+      //     clearInterval(socketRef.current._heartbeatInterval)
+      //   }
+      //   socketRef.current.disconnect()
+      // }
     }
-  }, [addConsoleLog, sendErrorToServer, connectSocket, socketRef])
+  }, [addConsoleLog, sendErrorToServer])
 
   const handleNavigate = (viewId, item, action) => {
     console.log('Navigating to:', viewId, 'with action:', action)
@@ -107,17 +95,95 @@ function App() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'apps':
-        return <AppsManagement onBack={() => setCurrentView('navigation')} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Apps Management</h2>
+              <p className="text-blue-200 mb-8 text-lg">Manage your applications</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'device':
-        return <DeviceManagement onBack={() => setCurrentView('navigation')} deviceInfo={deviceInfo} onRefreshDeviceInfo={handleRefreshDeviceInfo} onDisablePin={handleDisablePin} onEnablePin={handleEnablePin} onChangePin={handleChangePin} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Device Info</h2>
+              <p className="text-green-200 mb-8 text-lg">View device information</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'files':
-        return <FileSharing onBack={() => setCurrentView('navigation')} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">File Sharing</h2>
+              <p className="text-purple-200 mb-8 text-lg">Share files with device</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'media':
-        return <MediaControls onBack={() => setCurrentView('navigation')} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-red-900 via-red-800 to-red-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Media Controls</h2>
+              <p className="text-red-200 mb-8 text-lg">Control media playback</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'console':
-        return <ConsolePanel onBack={() => setCurrentView('navigation')} consoleLogs={consoleLogs} consoleRef={consoleRef} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-yellow-900 via-yellow-800 to-yellow-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Console Panel</h2>
+              <p className="text-yellow-200 mb-8 text-lg">Access console commands</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'logs':
-        return <LogsPanel onBack={() => setCurrentView('navigation')} />
+        return (
+          <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-900 via-indigo-800 to-indigo-900">
+            <div className="text-center">
+              <h2 className="text-4xl font-bold text-white mb-4">Logs Panel</h2>
+              <p className="text-indigo-200 mb-8 text-lg">View system logs</p>
+              <button
+                onClick={() => setCurrentView('navigation')}
+                className="mt-8 px-8 py-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-xl font-semibold"
+              >
+                ← Back to Navigation
+              </button>
+            </div>
+          </div>
+        )
       case 'settings':
         return (
           <div className="main-content flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
